@@ -1,7 +1,6 @@
 #################################################################################
-#    This file is a simple gui frontend for testing (and possibly using) the
-#    ftsolver module. It was developed by Paul S. Boneham
-#    Copyright (C) 2015  Paul S. Boneham
+#    This file is the ftsolver module, which solves fault trees.
+#    It was developed by Paul S. Boneham. Copyright (C) 2015  Paul S. Boneham
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published by
