@@ -20,8 +20,8 @@
 import wx
 import ft
 
-CONFIG_TREE_TO_SOLVE = "../ftsolver_2_unstaged/input_files/pv_paul.set"
-CONFIG_TREE_TOPGATE = "SM_GCD"
+CONFIG_TREE_TO_SOLVE = "../ftsolver_2_unstaged/input_files/test_ft.set"
+CONFIG_TREE_TOPGATE = "TOP"
 
 class ftgui(wx.Frame):
     def __init__(self, parent, id, title):

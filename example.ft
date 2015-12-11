@@ -1,0 +1,13 @@
+[control]
+evaluate=top
+cutoff=1E-20
+[tree]
+top=AND,IN1,IN2
+IN1=OR,BE1,BE2
+IN2=AND,IN3,BE1
+IN3=OR,BE3,BE4
+[data]
+BE1=0.1
+BE2=0.2
+BE3=0.01
+BE4=0.03
