@@ -20,7 +20,7 @@
 import wx
 import ft
 
-CONFIG_TREE_TO_SOLVE = "./input_files/pv_paul.set"
+CONFIG_TREE_TO_SOLVE = "../ftsolver_2_unstaged/input_files/pv_paul.set"
 CONFIG_TREE_TOPGATE = "SM_GCD"
 
 class ftgui(wx.Frame):
@@ -54,6 +54,7 @@ class ftgui(wx.Frame):
             prg.Update(1)
             print "create tree from SETS file"
             t.create_from_sets(CONFIG_TREE_TO_SOLVE)
+            #t.print_tree()
             prg.Update(2)
             print "prepare tree (check multiple refs)"
             t.prepare()
