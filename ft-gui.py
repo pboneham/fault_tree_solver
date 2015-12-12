@@ -51,11 +51,10 @@ class ftgui(wx.Frame):
         try:
             t = ft.tree()
             prg.Update(1)
-            print "create tree from SETS file"
+            print "Create tree from fault tree file"
             t.create_from_ft(CONFIG_TREE_TO_SOLVE)
-            #t.print_tree()
             prg.Update(2)
-            print "prepare tree (check multiple refs)"
+            print "Prepare tree (check multiple refs)"
             t.prepare()
             prg.Update(3)
             print "Solve tree ..."

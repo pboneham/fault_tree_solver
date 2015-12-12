@@ -24,11 +24,12 @@ import ConfigParser
 ################## Classes #############################################
 
 ################## FT file import filters ##############################
-class base_filter:
+class base_filter(object):
 
-    def __init__(self, infile):
-        self.infile = infile
+    def __init__(self):
         self.events = {}
+        self.tops = []
+        self.cutoff = 0.0
         pass
 
     def load_file(self,fn):
@@ -36,22 +37,20 @@ class base_filter:
         pass
 
     def export_tree(self):
-        f.close()
-        return self.events
+        self.f.close()
+        return self.events, self.tops, self.cutoff
 
 class sets_filter(base_filter):
 
-    def __init__(self, infile):
-        super(sets_filter,self).__init__(self, infile)
-
+    def __init__(self):
+        super(sets_filter,self).__init__()
 
     def load_file(self, f):
         # import a SETs file into the self.events structure
-        fs = open(f,"r")
-        print "Opened file"
+        super(sets_filter,self).load_file(f)
         counter = 0
         while 1:
-            line = fs.readline()
+            line = self.f.readline()
             if line == "":
                 break
             line = string.replace(line, "\n", "")
@@ -75,7 +74,7 @@ class sets_filter(base_filter):
                     s = string.replace(input, ",", "")
                     s = string.replace(s, ".", "")
                     inputs.append(s)
-                self.events[ename].add_row(inputs)
+                    self.events[ename].add_row(inputs)
                 print "done OR gate"
             if fields[0] == "BE$":
                 ename = string.replace( fields[1], ".", "")
@@ -85,43 +84,50 @@ class sets_filter(base_filter):
                 self.events[ename] = 0.01
             print "Read line", counter
             counter += 1
-        fs.close()
+        return super(sets_filter,self).export_tree()
     ## end method ##
 
 
 class ft_filter(base_filter):
 
-    def __init__(self, infile):
-        super(sets_filter,self).__init__(self, infile)
-
+    def __init__(self):
+        super(ft_filter,self).__init__()
 
     def load_file(self, f):
         # import a ft file into the self.events structure
-        fp = open(fp,"r")
+        super(ft_filter,self).load_file(f)
         cp = ConfigParser.ConfigParser()
-        cp.readfp(fp)
+        cp.readfp(self.f)
         counter = 0
         # now get settings, tree and data
         # settings
-        top = cp.get("control","top")
+        tmp = cp.get("control","evaluate")
+        tmp = tmp.split(",")
+        for item in tmp:
+            self.tops.append(item.upper())
         cutoff = cp.get("control", "cutoff")
         #tree
         tree_entries = cp.items("tree")
         for item in tree_entries:
-            self.events[item[0]] = gate_inputs()
+            entry_name = item[0].upper()
+            self.events[entry_name] = gate_inputs()
             gate_in_items = item[1].split(",")
             if gate_in_items[0].upper() == "OR":
+                print entry_name, "OR"
                 for it in gate_in_items[1:]:
-                    self.events[item[0]].add_row([it])
+                    self.events[entry_name].add_row([it.upper()])
             if gate_in_items[0].upper() == "AND":
+                print entry_name, "AND"
+                tmp = []
                 for it in gate_in_items[1:]:
-                    tmp.append(it)
-            self.events[item[0]].add_row(tmp)
+                    tmp.append(it.upper())
+                self.events[entry_name].add_row(gate_in_items[1:])
         #data
         data_entries = cp.items("data")
         for item in data_entries:
-            self.events[item[0]] = float(item[1])
-        
+            entry_name = item[0].upper()
+            self.events[entry_name] = float(item[1])
+        return super(ft_filter,self).export_tree()
     ## end method ##
 
 
@@ -227,8 +233,7 @@ class tree:
 
     def create_from_ft(self, f):
         tmp = ft_filter()
-        tmp.load_file(f)
-        self.events = tmp.export_tree()
+        self.events, self.tops, self.cutoff = tmp.load_file(f)
         
 
     def print_tree(self):
@@ -259,7 +264,7 @@ class tree:
 
     def solve(self, gate=None):
         if gate == None:
-            gate = self.tops[cur_top]
+            gate = self.tops[self.cur_top]
         solution = self.events[gate]
         r_prev = -1
         last_minimalisation = 0
