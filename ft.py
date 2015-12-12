@@ -18,9 +18,113 @@
 
 import string
 import copy
+import ConfigParser
 
 ########################################################################
 ################## Classes #############################################
+
+################## FT file import filters ##############################
+class base_filter:
+
+    def __init__(self, infile):
+        self.infile = infile
+        self.events = {}
+        pass
+
+    def load_file(self,fn):
+        self.f = open(fn,"r")
+        pass
+
+    def export_tree(self):
+        f.close()
+        return self.events
+
+class sets_filter(base_filter):
+
+    def __init__(self, infile):
+        super(sets_filter,self).__init__(self, infile)
+
+
+    def load_file(self, f):
+        # import a SETs file into the self.events structure
+        fs = open(f,"r")
+        print "Opened file"
+        counter = 0
+        while 1:
+            line = fs.readline()
+            if line == "":
+                break
+            line = string.replace(line, "\n", "")
+            print line
+            fields = string.split( line )
+            if fields[0] == "AG$":
+                ename = string.replace( fields[1], ".", "")
+                self.events[ename] = gate_inputs()
+                inputs = []
+                for input in fields[3:]:
+                    s = string.replace(input, ",", "")
+                    s = string.replace(s, ".", "")
+                    inputs.append(s)
+                self.events[ename].add_row( inputs )
+                print "done AND gate"
+            if fields[0] == "OG$":
+                ename = string.replace( fields[1], ".", "")
+                self.events[ename] = gate_inputs()
+                for input in fields[3:]:
+                    inputs = []
+                    s = string.replace(input, ",", "")
+                    s = string.replace(s, ".", "")
+                    inputs.append(s)
+                self.events[ename].add_row(inputs)
+                print "done OR gate"
+            if fields[0] == "BE$":
+                ename = string.replace( fields[1], ".", "")
+                self.events[ename] = 0.01
+            if fields[0] == "IE$":
+                ename = string.replace( fields[1], ".", "")
+                self.events[ename] = 0.01
+            print "Read line", counter
+            counter += 1
+        fs.close()
+    ## end method ##
+
+
+class ft_filter(base_filter):
+
+    def __init__(self, infile):
+        super(sets_filter,self).__init__(self, infile)
+
+
+    def load_file(self, f):
+        # import a ft file into the self.events structure
+        fp = open(fp,"r")
+        cp = ConfigParser.ConfigParser()
+        cp.readfp(fp)
+        counter = 0
+        # now get settings, tree and data
+        # settings
+        top = cp.get("control","top")
+        cutoff = cp.get("control", "cutoff")
+        #tree
+        tree_entries = cp.items("tree")
+        for item in tree_entries:
+            self.events[item[0]] = gate_inputs()
+            gate_in_items = item[1].split(",")
+            if gate_in_items[0].upper() == "OR":
+                for it in gate_in_items[1:]:
+                    self.events[item[0]].add_row([it])
+            if gate_in_items[0].upper() == "AND":
+                for it in gate_in_items[1:]:
+                    tmp.append(it)
+            self.events[item[0]].add_row(tmp)
+        #data
+        data_entries = cp.items("data")
+        for item in data_entries:
+            self.events[item[0]] = float(item[1])
+        
+    ## end method ##
+
+
 
 ################## Gate Inputs Class ###################################
 class gate_inputs:
@@ -115,52 +219,17 @@ class tree:
 
     def __init__(self):
         self.events = {}
+        self.cutoff = 0.0
+        self.tops =[]
+        self.cur_top = 0
     ## end method ##
 
 
-    def create_from_sets(self, f):
-        # import a SETs file into the self.events structure
-        fs = open(f,"r")
-        print "opened file"
-        counter = 0
-        while 1:
-            line = fs.readline()
-            if line == "":
-                break
-            line = string.replace(line, "\n", "")
-            print line
-            fields = string.split( line )
-            if fields[0] == "AG$":
-                ename = string.replace( fields[1], ".", "")
-                self.events[ename] = gate_inputs()
-                inputs = []
-                for input in fields[3:]:
-                    s = string.replace(input, ",", "")
-                    s = string.replace(s, ".", "")
-                    inputs.append(s)
-                self.events[ename].add_row( inputs )
-                print "done AND gate"
-            if fields[0] == "OG$":
-                ename = string.replace( fields[1], ".", "")
-                self.events[ename] = gate_inputs()
-                for input in fields[3:]:
-                    inputs = []
-                    s = string.replace(input, ",", "")
-                    s = string.replace(s, ".", "")
-                    inputs.append(s)
-                self.events[ename].add_row(inputs)
-                print "done OR gate"
-            if fields[0] == "BE$":
-                ename = string.replace( fields[1], ".", "")
-                self.events[ename] = 0.01
-            if fields[0] == "IE$":
-                ename = string.replace( fields[1], ".", "")
-                self.events[ename] = 0.01
-            print "Read line", counter
-            counter += 1
-        fs.close()
-    ## end method ##
-
+    def create_from_ft(self, f):
+        tmp = ft_filter()
+        tmp.load_file(f)
+        self.events = tmp.export_tree()
+        
 
     def print_tree(self):
         for key in self.events.keys():
@@ -169,7 +238,9 @@ class tree:
     ## end method ##
 
 
-    def print_gate(self, name):
+    def print_gate(self, name=None):
+        if name == None:
+            name = self.tops[self.cur_top]
         try:
             x = self.events[name] * 1
             print "(Basic Event):  ", self.events[name]
@@ -186,7 +257,9 @@ class tree:
     ## end method ##
 
 
-    def solve(self, gate):
+    def solve(self, gate=None):
+        if gate == None:
+            gate = self.tops[cur_top]
         solution = self.events[gate]
         r_prev = -1
         last_minimalisation = 0

@@ -20,8 +20,7 @@
 import wx
 import ft
 
-CONFIG_TREE_TO_SOLVE = "../ftsolver_2_unstaged/input_files/test_ft.set"
-CONFIG_TREE_TOPGATE = "TOP"
+CONFIG_TREE_TO_SOLVE = "./example.ft"
 
 class ftgui(wx.Frame):
     def __init__(self, parent, id, title):
@@ -53,16 +52,16 @@ class ftgui(wx.Frame):
             t = ft.tree()
             prg.Update(1)
             print "create tree from SETS file"
-            t.create_from_sets(CONFIG_TREE_TO_SOLVE)
+            t.create_from_ft(CONFIG_TREE_TO_SOLVE)
             #t.print_tree()
             prg.Update(2)
             print "prepare tree (check multiple refs)"
             t.prepare()
             prg.Update(3)
             print "Solve tree ..."
-            t.solve(CONFIG_TREE_TOPGATE)
+            t.solve()
             prg.Update(4)
-            t.print_gate(CONFIG_TREE_TOPGATE)
+            t.print_gate()
             prg.Update(5)
             completed = 1
         except:
