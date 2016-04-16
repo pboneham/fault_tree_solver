@@ -26,13 +26,15 @@ import fault_tree_nwx
 ################## dummy class linking to actual solver (there is a choice) #####
 class tree:
 
-    def __init__(self, use_nwx = int 0):
-		if use_nwx == 0:
-			self.ft_obj = ft_zero.tree()
-		if use_nwx == 1:
-			self.ft_o
-		print "Fault tree object not created - index", use_nwx, "not available"
-		exit(1)
+    def __init__(self, use_nwx = 0):
+        if use_nwx == 0:
+            self.ft_obj = ft_zero.tree()
+            return
+        if use_nwx == 1:
+            self.ft_obj = fault_tree_nwx.tree()
+            return
+        print "Fault tree object not created - index", use_nwx, "not available"
+        exit(1)
     ## end method ##
 
     def create_from_ft(self, f):
@@ -43,8 +45,9 @@ class tree:
     ## end method ##
 
     def print_gate(self, name=None):
-		self.ft_obj.print_gate(name)
+        self.ft_obj.print_gate(name)
     ## end method ##
 
     def solve(self, gate=None):
+        self.ft_obj.solve(gate)
     ## end method ##

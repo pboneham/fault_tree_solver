@@ -163,7 +163,7 @@ class tree:
 
 
     def create_from_ft(self, f):
-		
+        pass
 
     def print_tree(self):
         #print networkx.info(ft)
@@ -182,20 +182,10 @@ class tree:
         plt.show()
     ## end method ##
 
-
     def print_gate(self, name=None):
+        pass
     ## end method ##
-
-    def mark_modules(self):
-
-    def check_inputs(self, key):
-        
 
     def solve(self, gate=None):
         solve(self.ft)
-    ## end method ##
-
-
-    def prepare(self):
-
     ## end method ##
